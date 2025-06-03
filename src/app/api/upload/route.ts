@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { writeFile } from "fs/promises";
-import path, { join } from "path";
+import path from "path";
 import { mkdir, access } from "fs/promises";
 
 const PHOTOS_DIR = path.join(process.env.PHOTOFRAME_BASE_PATH!, "web/uploads");

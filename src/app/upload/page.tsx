@@ -1,12 +1,37 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
+import Notification from "../_components/Notification";
 
 export default function UploadPage() {
   const [folderName, setFolderName] = useState("");
+  const [selectedFolder, setSelectedFolder] = useState("other");
+  const [existingFolders, setExistingFolders] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFolders = async () => {
+      try {
+        const response = await fetch("/api/folders");
+        if (!response.ok) throw new Error("Failed to fetch folders");
+        const data = await response.json();
+        setExistingFolders(data.folders);
+      } catch (error) {
+        console.error("Error fetching folders:", error);
+        showNotification("Failed to load folders");
+      }
+    };
+
+    fetchFolders();
+  }, []);
+
+  const showNotification = (message: string) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 2000);
+  };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles((prev) => [...prev, ...acceptedFiles]);
@@ -21,11 +46,13 @@ export default function UploadPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!folderName || files.length === 0) return;
+    const finalFolderName =
+      selectedFolder === "other" ? folderName : selectedFolder;
+    if (!finalFolderName || files.length === 0) return;
 
     setIsUploading(true);
     const formData = new FormData();
-    formData.append("folderName", folderName);
+    formData.append("folderName", finalFolderName);
     files.forEach((file) => {
       formData.append("files", file);
     });
@@ -42,18 +69,19 @@ export default function UploadPage() {
 
       // Clear form after successful upload
       setFolderName("");
+      setSelectedFolder("other");
       setFiles([]);
-      alert("Upload successful!");
+      showNotification("Upload successful!");
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Upload failed. Please try again.");
+      showNotification("Upload failed. Please try again.");
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-8">
+    <main className="min-h-screen bg-black text-white p-8 relative">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-red-400 text-3xl font-bold mb-8 text-center">
           Upload Photos
@@ -61,20 +89,45 @@ export default function UploadPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
-              htmlFor="foldername"
+              htmlFor="folderSelect"
               className="block text-sm font-medium mb-2"
             >
-              Folder Name
+              Select Folder
             </label>
-            <input
-              type="text"
-              id="foldername"
-              value={folderName}
-              onChange={(e) => setFolderName(e.target.value)}
+            <select
+              id="folderSelect"
+              value={selectedFolder}
+              onChange={(e) => setSelectedFolder(e.target.value)}
               className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
-            />
+            >
+              <option value="other">Create New Folder</option>
+              {existingFolders.map((folder) => (
+                <option key={folder} value={folder}>
+                  {folder}
+                </option>
+              ))}
+            </select>
           </div>
+
+          {selectedFolder === "other" && (
+            <div>
+              <label
+                htmlFor="foldername"
+                className="block text-sm font-medium mb-2"
+              >
+                New Folder Name
+              </label>
+              <input
+                type="text"
+                id="foldername"
+                value={folderName}
+                onChange={(e) => setFolderName(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required={selectedFolder === "other"}
+              />
+            </div>
+          )}
 
           <div
             {...getRootProps()}
@@ -121,10 +174,16 @@ export default function UploadPage() {
 
           <button
             type="submit"
-            disabled={isUploading || !folderName || files.length === 0}
+            disabled={
+              isUploading ||
+              (selectedFolder === "other" && !folderName) ||
+              files.length === 0
+            }
             className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-colors
               ${
-                isUploading || !folderName || files.length === 0
+                isUploading ||
+                (selectedFolder === "other" && !folderName) ||
+                files.length === 0
                   ? "bg-gray-700 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
               }`}
@@ -133,6 +192,7 @@ export default function UploadPage() {
           </button>
         </form>
       </div>
+      <Notification message={notification} />
     </main>
   );
 }

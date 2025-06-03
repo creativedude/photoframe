@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const PHOTOS_DIR = path.join(process.env.PHOTOFRAME_BASE_PATH!, "web/photos");
+const PHOTOS_DIR = path.join(
+  process.env.PHOTOFRAME_BASE_PATH!,
+  "web/uploads/test"
+);
 
 export async function GET(
   request: Request,

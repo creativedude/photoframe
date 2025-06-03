@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import Notification from "./Notification";
 
 type PhotoState = "liked" | "disliked" | undefined;
 
@@ -170,16 +171,7 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
         </motion.div>
       </AnimatePresence>
 
-      {notification && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/75 text-white px-6 py-3 rounded-full"
-        >
-          {notification}
-        </motion.div>
-      )}
+      <Notification message={notification} />
     </div>
   );
 }
