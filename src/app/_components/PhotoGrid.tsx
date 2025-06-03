@@ -4,13 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
-type PhotoState = "liked" | "disliked" | undefined;
-
-interface PhotoGridProps {
-  photoState?: PhotoState;
-}
-
-export default function PhotoGrid({ photoState }: PhotoGridProps) {
+export default function PhotoGrid() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +21,7 @@ export default function PhotoGrid({ photoState }: PhotoGridProps) {
       }
     } catch (err) {
       setError("Failed to fetch photos");
+      console.error("Error fetching photos:", err);
     } finally {
       setLoading(false);
     }

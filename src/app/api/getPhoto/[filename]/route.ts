@@ -2,15 +2,16 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const PHOTOS_DIR = path.join(process.env.PHOTOFRAME_BASE_PATH!, "web/photos");
+if (!process.env.PHOTOFRAME_BASE_PATH) {
+  throw new Error("PHOTOFRAME_BASE_PATH environment variable is not set.");
+}
 
-export async function GET(
-  request: Request,
-  { params }: { params: { filename: string } }
-) {
+const PHOTOS_DIR = path.join(process.env.PHOTOFRAME_BASE_PATH, "web/photos");
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function GET(request: Request, context: any) {
   try {
-    // Ensure params is properly awaited
-    const { filename } = await Promise.resolve(params);
+    const { filename } = context.params;
     const filePath = path.join(PHOTOS_DIR, filename);
 
     // Check if file exists

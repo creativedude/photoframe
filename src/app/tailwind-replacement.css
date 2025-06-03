@@ -1,0 +1,68 @@
+/* Layout and positioning */
+.h-screen {
+  height: 100vh;
+}
+
+.w-screen {
+  width: 100vw;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+/* Flexbox utilities */
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+/* Spacing and sizing */
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+/* Colors */
+.bg-black {
+  background-color: black;
+}
+
+.text-red-500 {
+  color: rgb(239, 68, 68);
+}
+
+/* Overflow */
+.overflow-hidden {
+  overflow: hidden;
+}
+
+/* Object fit */
+.object-contain {
+  object-fit: contain;
+}
+
+/* Position */
+.relative {
+  position: relative;
+}
+
+/* Image specific */
+.fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

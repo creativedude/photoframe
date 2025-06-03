@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,7 +14,7 @@ export default function Slideshow() {
   const [direction, setDirection] = useState<Direction>("right");
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const fetchPhotos = async () => {
+  const fetchPhotos = useCallback(async () => {
     try {
       const response = await fetch("/api/getPhotoList");
       const data = await response.json();
@@ -29,15 +29,16 @@ export default function Slideshow() {
       }
     } catch (err) {
       setError("Failed to fetch photos");
+      console.error("Error fetching photos:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentIndex]);
 
   // Fetch photos on component mount
   useEffect(() => {
     fetchPhotos();
-  }, []);
+  }, [fetchPhotos]);
 
   const getVariants = (direction: Direction) => {
     const distance = 1000; // pixels to move
@@ -70,7 +71,7 @@ export default function Slideshow() {
     };
   };
 
-  const handleLike = async () => {
+  const handleLike = useCallback(async () => {
     if (isAnimating) return;
     setIsAnimating(true);
     setDirection("up");
@@ -97,9 +98,9 @@ export default function Slideshow() {
       console.error("Error liking photo:", err);
       setIsAnimating(false);
     }
-  };
+  }, [isAnimating, photos, currentIndex, fetchPhotos]);
 
-  const handleDislike = async () => {
+  const handleDislike = useCallback(async () => {
     if (isAnimating) return;
     setIsAnimating(true);
     setDirection("down");
@@ -126,7 +127,7 @@ export default function Slideshow() {
       console.error("Error disliking photo:", err);
       setIsAnimating(false);
     }
-  };
+  }, [isAnimating, photos, currentIndex, fetchPhotos]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -150,7 +151,7 @@ export default function Slideshow() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [photos, currentIndex, isAnimating]);
+  }, [photos, currentIndex, isAnimating, handleLike, handleDislike]);
 
   // Handle slideshow timing
   useEffect(() => {

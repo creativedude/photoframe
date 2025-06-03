@@ -2,18 +2,20 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const PHOTOS_DIR = path.join(process.env.PHOTOFRAME_BASE_PATH!, "web/photos");
+if (!process.env.PHOTOFRAME_BASE_PATH) {
+  throw new Error("PHOTOFRAME_BASE_PATH environment variable is not set.");
+}
+
+const PHOTOS_DIR = path.join(process.env.PHOTOFRAME_BASE_PATH, "web/photos");
 const LIKED_PHOTOS_DIR = path.join(
-  process.env.PHOTOFRAME_BASE_PATH!,
+  process.env.PHOTOFRAME_BASE_PATH,
   "web/likedphotos"
 );
 
-export async function POST(
-  request: Request,
-  { params }: { params: { filename: string } }
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function POST(request: Request, context: any) {
   try {
-    const { filename } = await Promise.resolve(params);
+    const { filename } = context.params;
     const sourcePath = path.join(PHOTOS_DIR, filename);
     const targetPath = path.join(LIKED_PHOTOS_DIR, filename);
 
