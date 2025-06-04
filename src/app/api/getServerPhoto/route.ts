@@ -6,7 +6,7 @@ const PHOTOS_DIR = path.join(
   process.env.PHOTOFRAME_BASE_PATH!,
   "web/uploads/test"
 );
-const PHOTO_INTERVAL = 10000; // 10 seconds
+const PHOTO_INTERVAL = 60000; // 10 seconds
 
 // Server-side state
 let currentPhotoIndex = 0;
@@ -113,6 +113,6 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Error getting server photo:", error);
-    return NextResponse.json({ error: "Failed to get photo" }, { status: 500 });
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }
