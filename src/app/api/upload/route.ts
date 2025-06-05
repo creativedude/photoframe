@@ -3,7 +3,7 @@ import { writeFile } from "fs/promises";
 import path from "path";
 import { mkdir, access } from "fs/promises";
 
-const PHOTOS_DIR = path.join(process.env.PHOTOFRAME_BASE_PATH!, "web/uploads");
+const PHOTOS_DIR = path.join(process.env.PHOTOFRAME_BASE_PATH!, "uploads");
 
 export async function POST(request: Request) {
   try {

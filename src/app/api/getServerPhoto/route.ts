@@ -2,48 +2,84 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const PHOTOS_DIR = path.join(
-  process.env.PHOTOFRAME_BASE_PATH!,
-  "web/uploads/test"
-);
-const PHOTO_INTERVAL = 60000; // 10 seconds
-
 // Server-side state
 let currentPhotoIndex = 0;
 let lastUpdateTime = Date.now();
 let photos: string[] = [];
 let lastPhotoUpdate = 0;
 let lastUserAction = 0;
+let currentSettings = {
+  currentFolder: "",
+  displayTime: 30000,
+};
 
 // Initialize photos list
 function initializePhotos() {
+  const PHOTOS_DIR = path.join(
+    process.env.PHOTOFRAME_BASE_PATH!,
+    "uploads",
+    currentSettings.currentFolder
+  );
+
+  console.log("getting photos from PHOTOS_DIR", PHOTOS_DIR);
+
   if (fs.existsSync(PHOTOS_DIR)) {
     photos = fs
       .readdirSync(PHOTOS_DIR)
       .filter((file) => /\.(jpg|jpeg|png|gif|webp)$/i.test(file));
+
+    // Reset index if it's out of bounds
+    if (currentPhotoIndex >= photos.length) {
+      currentPhotoIndex = 0;
+    }
+  } else {
+    photos = [];
+    currentPhotoIndex = 0;
   }
   return photos;
 }
 
+// Load settings from settings.json
+function loadSettings() {
+  const SETTINGS_PATH = path.join(
+    process.env.PHOTOFRAME_BASE_PATH!,
+    "settings.json"
+  );
+  if (fs.existsSync(SETTINGS_PATH)) {
+    const settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf-8"));
+    currentSettings = {
+      currentFolder: settings.currentFolder || "",
+      displayTime: settings.displayTime || 30000,
+    };
+  }
+  return currentSettings;
+}
+
 // Get current photo based on time and user actions
 function getCurrentPhoto() {
+  console.log("getting current photo");
   const now = Date.now();
   const timeSinceLastUpdate = now - lastUpdateTime;
 
   // If it's time to update the photo (and no recent user action)
   if (
-    timeSinceLastUpdate >= PHOTO_INTERVAL &&
-    now - lastUserAction > PHOTO_INTERVAL
+    timeSinceLastUpdate >= currentSettings.displayTime &&
+    now - lastUserAction > currentSettings.displayTime
   ) {
-    const updatesNeeded = Math.floor(timeSinceLastUpdate / PHOTO_INTERVAL);
+    const updatesNeeded = Math.floor(
+      timeSinceLastUpdate / currentSettings.displayTime
+    );
     currentPhotoIndex = (currentPhotoIndex + updatesNeeded) % photos.length;
     lastUpdateTime = now;
     lastPhotoUpdate = now;
+    console.log("photos", photos);
   }
-
+  console.log("photos", photos);
+  console.log("returning current photo", photos[currentPhotoIndex]);
+  console.log("settings", currentSettings);
   return {
     photo: photos[currentPhotoIndex],
-    nextUpdateIn: PHOTO_INTERVAL - (now - lastPhotoUpdate),
+    nextUpdateIn: currentSettings.displayTime - (now - lastPhotoUpdate),
     currentIndex: currentPhotoIndex,
     totalPhotos: photos.length,
   };
@@ -56,13 +92,12 @@ function handleUserAction(action: "next" | "prev" | "like" | "dislike") {
   lastUpdateTime = now;
   lastPhotoUpdate = now;
 
-  // Refresh photo list for like/dislike actions
-  if (action === "like" || action === "dislike") {
-    initializePhotos();
-    // Adjust current index if needed
-    if (currentPhotoIndex >= photos.length) {
-      currentPhotoIndex = 0;
-    }
+  // Always refresh photo list for any action
+  initializePhotos();
+
+  // If no photos left, return early
+  if (photos.length === 0) {
+    return;
   }
 
   switch (action) {
@@ -74,11 +109,8 @@ function handleUserAction(action: "next" | "prev" | "like" | "dislike") {
         (currentPhotoIndex - 1 + photos.length) % photos.length;
       break;
     case "like":
-      // Move to next photo after liking
-      currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
-      break;
     case "dislike":
-      // Move to next photo after disliking
+      // Move to next photo after like/dislike
       currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
       break;
   }
@@ -86,6 +118,9 @@ function handleUserAction(action: "next" | "prev" | "like" | "dislike") {
 
 export async function GET(request: Request) {
   try {
+    // Load current settings
+    loadSettings();
+
     // Initialize photos if not already done
     if (photos.length === 0) {
       initializePhotos();

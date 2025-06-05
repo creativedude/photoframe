@@ -30,9 +30,12 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
     setTimeout(() => setNotification(null), 2000);
   };
 
-  const fetchCurrentPhoto = async () => {
+  const fetchCurrentPhoto = async (action?: string) => {
     try {
-      const response = await fetch("/api/getServerPhoto");
+      const url = action
+        ? `/api/getServerPhoto?action=${action}`
+        : "/api/getServerPhoto";
+      const response = await fetch(url);
       const data = await response.json();
       if (data.error) {
         setError(data.error);
@@ -48,7 +51,7 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
 
   useEffect(() => {
     fetchCurrentPhoto();
-    const interval = setInterval(fetchCurrentPhoto, 1000);
+    const interval = setInterval(() => fetchCurrentPhoto(), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -65,10 +68,8 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
       );
       if (response.ok) {
         showNotification("Liked photo");
-        setTimeout(() => {
-          fetchCurrentPhoto();
-          setIsAnimating(false);
-        }, 500);
+        await fetchCurrentPhoto("like");
+        setIsAnimating(false);
       }
     } catch (err) {
       console.error("Error liking photo:", err);
@@ -89,10 +90,8 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
       );
       if (response.ok) {
         showNotification("Disliked photo");
-        setTimeout(() => {
-          fetchCurrentPhoto();
-          setIsAnimating(false);
-        }, 500);
+        await fetchCurrentPhoto("dislike");
+        setIsAnimating(false);
       }
     } catch (err) {
       console.error("Error disliking photo:", err);
@@ -107,11 +106,11 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
       switch (e.key) {
         case "ArrowLeft":
           showNotification("Previous photo");
-          fetchCurrentPhoto();
+          fetchCurrentPhoto("prev");
           break;
         case "ArrowRight":
           showNotification("Next photo");
-          fetchCurrentPhoto();
+          fetchCurrentPhoto("next");
           break;
         case "ArrowUp":
           handleLike();

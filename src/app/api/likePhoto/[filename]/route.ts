@@ -2,11 +2,17 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const PHOTOS_DIR = path.join(process.env.PHOTOFRAME_BASE_PATH!, "web/photos");
-const LIKED_PHOTOS_DIR = path.join(
-  process.env.PHOTOFRAME_BASE_PATH!,
-  "web/likedphotos"
-);
+// Load settings from settings.json
+function loadSettings() {
+  const SETTINGS_PATH = path.join(
+    process.env.PHOTOFRAME_BASE_PATH!,
+    "settings.json"
+  );
+  if (fs.existsSync(SETTINGS_PATH)) {
+    return JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf-8"));
+  }
+  return { currentFolder: "" };
+}
 
 export async function POST(
   request: Request,
@@ -14,6 +20,20 @@ export async function POST(
 ) {
   try {
     const { filename } = await Promise.resolve(params);
+    const settings = loadSettings();
+
+    const PHOTOS_DIR = path.join(
+      process.env.PHOTOFRAME_BASE_PATH!,
+      "uploads",
+      settings.currentFolder
+    );
+    const LIKED_PHOTOS_DIR = path.join(
+      process.env.PHOTOFRAME_BASE_PATH!,
+      "uploads",
+      settings.currentFolder,
+      "likedphotos"
+    );
+
     const sourcePath = path.join(PHOTOS_DIR, filename);
     const targetPath = path.join(LIKED_PHOTOS_DIR, filename);
 
