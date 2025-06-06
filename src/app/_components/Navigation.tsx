@@ -8,8 +8,9 @@ import SettingsModal from "./SettingsModal";
 
 const pages = [
   { name: "List Images", path: "/" },
-  { name: "Slideshow", path: "/slideshow" },
-  { name: "Server Pics", path: "/serverpics" },
+  // { name: "Slideshow", path: "/slideshow" },
+  { name: "Frame photos", path: "/serverpics" },
+  { name: "Upload", path: "/upload" },
 ];
 
 export default function Navigation() {

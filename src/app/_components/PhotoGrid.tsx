@@ -115,10 +115,8 @@ export default function PhotoGrid({ photoState }: PhotoGridProps) {
                 className="relative w-full"
                 style={{ aspectRatio: "1/1" }}
               >
-                <Image
+                <img
                   src={`/api/getPhoto/${encodeURIComponent(photo)}`}
-                  alt={photo}
-                  fill
                   className="object-cover rounded-lg"
                 />
                 <div className="absolute bottom-4 right-4 flex gap-6">

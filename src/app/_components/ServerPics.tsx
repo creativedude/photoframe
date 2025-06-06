@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import Notification from "./Notification";
+import PhotoLoader from "./PhotoLoader";
 
 type PhotoState = "liked" | "disliked" | undefined;
 
@@ -27,7 +27,7 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
 
   const showNotification = (message: string) => {
     setNotification(message);
-    setTimeout(() => setNotification(null), 2000);
+    setTimeout(() => setNotification(null), 4000);
   };
 
   const fetchCurrentPhoto = async (action?: string) => {
@@ -51,7 +51,7 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
 
   useEffect(() => {
     fetchCurrentPhoto();
-    const interval = setInterval(() => fetchCurrentPhoto(), 1000);
+    const interval = setInterval(() => fetchCurrentPhoto(), 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -152,22 +152,7 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
   return (
     <div className="h-screen w-screen bg-black relative">
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentPhoto.photo}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative w-full h-full"
-        >
-          <Image
-            src={`/api/getPhoto/${encodeURIComponent(currentPhoto.photo)}`}
-            alt={currentPhoto.photo}
-            fill
-            className="object-contain"
-            priority
-          />
-        </motion.div>
+        <PhotoLoader photo={currentPhoto.photo} />
       </AnimatePresence>
 
       <Notification message={notification} />

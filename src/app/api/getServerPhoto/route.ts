@@ -127,7 +127,18 @@ export async function GET(request: Request) {
     }
 
     if (photos.length === 0) {
-      return NextResponse.json({ error: "No photos found" }, { status: 404 });
+      const PHOTOS_DIR = path.join(
+        process.env.PHOTOFRAME_BASE_PATH!,
+        "uploads",
+        currentSettings.currentFolder
+      );
+      return NextResponse.json(
+        {
+          error: "No photos found",
+          photosDir: PHOTOS_DIR,
+        },
+        { status: 404 }
+      );
     }
 
     // Check for action parameter
