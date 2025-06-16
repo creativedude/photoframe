@@ -12,9 +12,6 @@ fi
 # Create photodir if it doesn't exist
 mkdir -p "$PHOTODIR"
 
-# Store the user's npm path before sudo operations
-NPM_PATH=$(which npm)
-
 # Copy service file
 echo "Copying photoframe.service to /etc/systemd/system/"
 sudo cp photoframe.service /etc/systemd/system/
@@ -33,8 +30,8 @@ sudo chmod +x /usr/local/bin/start.sh
 echo "Creating .env file"
 echo "PHOTOFRAME_BASE_PATH=$PHOTODIR" > .env
 
-# Run npm install using the stored npm path
+# Run npm install as the current user
 echo "Running npm install"
-"$NPM_PATH" install
+sudo -u $SUDO_USER npm install
 
 echo "Installation complete!" 
