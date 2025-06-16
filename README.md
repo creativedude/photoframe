@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PhotoFrame
 
-## Getting Started
+A digital photo frame application that displays photos from a specified directory.
 
-First, run the development server:
+## Installation
+
+1. Make the installation script executable:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+chmod +x install.sh
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run the installation script:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Option 1: Use default photo directory (current directory + "/photolibrary")
+./install.sh
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Option 2: Specify a custom photo directory
+./install.sh /path/to/your/photos
+```
 
-## Learn More
+## What the Installation Does
 
-To learn more about Next.js, take a look at the following resources:
+The installation script performs the following actions:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Service File Setup**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   - Copies `photoframe.service` to `/etc/systemd/system/`
+   - This enables the application to run as a system service
+   - Requires sudo privileges
 
-## Deploy on Vercel
+2. **Start Script Setup**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   - Updates `start.sh` with the current installation directory
+   - Copies `start.sh` to your home directory (`~/start.sh`)
+   - Makes the script executable
+   - The start script checks for the working directory and runs the application when ready
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Environment Configuration**
+
+   - Creates a `.env` file in the application directory
+   - Sets `PHOTOFRAME_BASE_PATH` to your specified photo directory
+   - This tells the application where to find your photos
+
+4. **Dependencies**
+   - Runs `npm install` to install all required Node.js dependencies
+
+## Photo Directory
+
+The photo directory is where your photos will be stored and displayed from. You can specify this in two ways:
+
+1. **Default Location**: If you don't specify a directory, it will create a `photolibrary` folder in the current directory
+2. **Custom Location**: Provide a full path to your preferred photo directory when running the installation script
+
+Example:
+
+```bash
+# Use default location
+./install.sh
+
+# Use custom location
+./install.sh /mnt/photodisk/myphotos
+```
+
+## Starting the Application
+
+After installation, the application will be set up as a system service. You can start it using:
+
+```bash
+sudo systemctl start photoframe
+```
+
+To enable automatic startup on boot:
+
+```bash
+sudo systemctl enable photoframe
+```
