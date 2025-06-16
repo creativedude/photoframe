@@ -1,0 +1,15 @@
+[Unit]
+Description=Photo Frame Next.js Application
+After=network.target
+
+[Service]
+Type=simple
+User=photos
+WorkingDirectory=/mnt/photodisk/photostest/photoframe
+ExecStart=/snap/bin/npm start
+Restart=on-failure
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target
