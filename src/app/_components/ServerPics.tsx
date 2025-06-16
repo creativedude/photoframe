@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Notification from "./Notification";
 import PhotoLoader from "./PhotoLoader";
 import ServerMenu from "./ServerMenu";
+import { menu } from "framer-motion/client";
 
 type PhotoState = "liked" | "disliked" | undefined;
 
@@ -20,6 +21,8 @@ interface ServerPhoto {
 }
 
 export default function ServerPics({ photoState }: ServerPicsProps) {
+  const [menuActive, setMenuActive] = useState(false);
+
   const [currentPhoto, setCurrentPhoto] = useState<ServerPhoto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -105,72 +108,68 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
   >(false);
   const [hide, setHide] = useState(false);
 
-  const [menuActive, setMenuActive] = useState(false);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      console.log(e.key, menuActive);
-      if (isAnimating) return;
+      let isMenuActive = menuActive;
+
+      if (e.key === "Enter") {
+        isMenuActive = true;
+        setMenuActive(true);
+        return;
+      }
+
+      if (isAnimating || isMenuActive) return;
+
       setHide(true);
-      if (!menuActive) {
-        console.log("not menu active");
-        switch (e.key) {
-          case "ArrowLeft":
-            setAnimate("left");
-            showNotification("Previous photo");
-            setTimeout(() => {
-              fetchCurrentPhoto("prev");
-              setAnimate(false);
-            }, 500);
-
-            setTimeout(() => {
-              setHide(false);
-            }, 1000);
-            break;
-          case "ArrowRight":
-            setAnimate("right");
-            showNotification("Next photo");
-            setTimeout(() => {
-              fetchCurrentPhoto("next");
-              setAnimate(false);
-            }, 500);
-
-            setTimeout(() => {
-              setHide(false);
-            }, 1000);
-            break;
-          case "ArrowUp":
-            setAnimate("up");
-            setTimeout(() => {
-              handleLike();
-              setAnimate(false);
-            }, 500);
-
-            setTimeout(() => {
-              setHide(false);
-            }, 1000);
-            break;
-          case "ArrowDown":
-            setAnimate("down");
-            setTimeout(() => {
-              handleDislike();
-              setAnimate(false);
-            }, 500);
-
-            setTimeout(() => {
-              setHide(false);
-            }, 1000);
-            break;
-          case "Enter":
-            setMenuActive(true);
-            break;
-        }
+      switch (e.key) {
+        case "ArrowLeft":
+          setAnimate("left");
+          showNotification("Previous photo");
+          setTimeout(() => {
+            fetchCurrentPhoto("prev");
+            setAnimate(false);
+          }, 500);
+          setTimeout(() => {
+            setHide(false);
+          }, 1000);
+          break;
+        case "ArrowRight":
+          setAnimate("right");
+          showNotification("Next photo");
+          setTimeout(() => {
+            fetchCurrentPhoto("next");
+            setAnimate(false);
+          }, 500);
+          setTimeout(() => {
+            setHide(false);
+          }, 1000);
+          break;
+        case "ArrowUp":
+          setAnimate("up");
+          setTimeout(() => {
+            handleLike();
+            setAnimate(false);
+          }, 500);
+          setTimeout(() => {
+            setHide(false);
+          }, 1000);
+          break;
+        case "ArrowDown":
+          setAnimate("down");
+          setTimeout(() => {
+            handleDislike();
+            setAnimate(false);
+          }, 500);
+          setTimeout(() => {
+            setHide(false);
+          }, 1000);
+          break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentPhoto, isAnimating]);
+  }, [currentPhoto, isAnimating, menuActive]);
 
   if (loading) {
     return (

@@ -51,8 +51,11 @@ function loadSettings() {
       currentFolder: settings.currentFolder || "",
       displayTime: settings.displayTime || 30000,
     };
+    console.log("Loaded settings from file:", settings);
+  } else {
+    console.log("No settings file found at:", SETTINGS_PATH);
   }
-  return currentSettings;
+  return { ...currentSettings }; // Return a new object to ensure we're not referencing the same object
 }
 
 // Get current photo based on time and user actions
@@ -72,11 +75,11 @@ function getCurrentPhoto() {
     currentPhotoIndex = (currentPhotoIndex + updatesNeeded) % photos.length;
     lastUpdateTime = now;
     lastPhotoUpdate = now;
-    console.log("photos", photos);
+    //console.log("photos", photos);
   }
-  console.log("photos", photos);
-  console.log("returning current photo", photos[currentPhotoIndex]);
-  console.log("settings", currentSettings);
+  // console.log("photos", photos);
+  // console.log("returning current photo", photos[currentPhotoIndex]);
+  // console.log("settings", currentSettings);
   return {
     photo: photos[currentPhotoIndex],
     nextUpdateIn: currentSettings.displayTime - (now - lastPhotoUpdate),
@@ -119,11 +122,25 @@ function handleUserAction(action: "next" | "prev" | "like" | "dislike") {
 export async function GET(request: Request) {
   try {
     // Load current settings
-    loadSettings();
+    const settings = loadSettings();
+
+    // Check if folder has changed and reinitialize if needed
+    if (settings.currentFolder !== currentSettings.currentFolder) {
+      console.log("Folder has changed, reinitializing!");
+      console.log("Old folder:", currentSettings.currentFolder);
+      console.log("New folder:", settings.currentFolder);
+      currentSettings = { ...settings }; // Create new object here too
+      photos = [];
+      currentPhotoIndex = 0;
+      initializePhotos(); // Immediately reinitialize photos with new folder
+    }
 
     // Initialize photos if not already done
-    if (photos.length === 0) {
-      initializePhotos();
+    //if (photos.length === 0) {
+    initializePhotos();
+    //}
+    if (currentPhotoIndex >= photos.length) {
+      currentPhotoIndex = 0;
     }
 
     if (photos.length === 0) {
