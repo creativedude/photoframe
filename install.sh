@@ -39,4 +39,9 @@ echo "PHOTOFRAME_BASE_PATH=$PHOTODIR" > .env
 echo "Running npm install"
 npm install
 
+
+# Run npm install
+echo "Running npm run build"
+npm run build
+
 echo "Installation complete!" 
