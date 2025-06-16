@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=photos
-WorkingDirectory=/mnt/photodisk/photostest/photoframe
-ExecStart=/snap/bin/npm start
+WorkingDirectory=/
+ExecStart=/start.sh
 Restart=on-failure
 Environment=NODE_ENV=production
 Environment=PORT=3000
