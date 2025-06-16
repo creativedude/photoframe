@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=photos
-WorkingDirectory=/
-ExecStart=/start.sh
+WorkingDirectory=/usr/local/bin
+ExecStart=/usr/local/bin/start.sh
 Restart=on-failure
 Environment=NODE_ENV=production
 Environment=PORT=3000
