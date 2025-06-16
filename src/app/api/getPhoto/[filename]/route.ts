@@ -35,7 +35,15 @@ export async function GET(
 
     // Check if file exists
     if (!fs.existsSync(filePath)) {
-      return NextResponse.json({ error: "Photo not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: "Photo not found",
+          settings: settings,
+          dir: PHOTOS_DIR,
+          filePath: filePath,
+        },
+        { status: 404 }
+      );
     }
 
     // Read the file

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Notification from "./Notification";
 import PhotoLoader from "./PhotoLoader";
+import ServerMenu from "./ServerMenu";
 
 type PhotoState = "liked" | "disliked" | undefined;
 
@@ -99,25 +100,71 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
     }
   };
 
+  const [animate, setAnimate] = useState<
+    "left" | "right" | "up" | "down" | boolean
+  >(false);
+  const [hide, setHide] = useState(false);
+
+  const [menuActive, setMenuActive] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      console.log(e.key, menuActive);
       if (isAnimating) return;
+      setHide(true);
+      if (!menuActive) {
+        console.log("not menu active");
+        switch (e.key) {
+          case "ArrowLeft":
+            setAnimate("left");
+            showNotification("Previous photo");
+            setTimeout(() => {
+              fetchCurrentPhoto("prev");
+              setAnimate(false);
+            }, 500);
 
-      switch (e.key) {
-        case "ArrowLeft":
-          showNotification("Previous photo");
-          fetchCurrentPhoto("prev");
-          break;
-        case "ArrowRight":
-          showNotification("Next photo");
-          fetchCurrentPhoto("next");
-          break;
-        case "ArrowUp":
-          handleLike();
-          break;
-        case "ArrowDown":
-          handleDislike();
-          break;
+            setTimeout(() => {
+              setHide(false);
+            }, 1000);
+            break;
+          case "ArrowRight":
+            setAnimate("right");
+            showNotification("Next photo");
+            setTimeout(() => {
+              fetchCurrentPhoto("next");
+              setAnimate(false);
+            }, 500);
+
+            setTimeout(() => {
+              setHide(false);
+            }, 1000);
+            break;
+          case "ArrowUp":
+            setAnimate("up");
+            setTimeout(() => {
+              handleLike();
+              setAnimate(false);
+            }, 500);
+
+            setTimeout(() => {
+              setHide(false);
+            }, 1000);
+            break;
+          case "ArrowDown":
+            setAnimate("down");
+            setTimeout(() => {
+              handleDislike();
+              setAnimate(false);
+            }, 500);
+
+            setTimeout(() => {
+              setHide(false);
+            }, 1000);
+            break;
+          case "Enter":
+            setMenuActive(true);
+            break;
+        }
       }
     };
 
@@ -150,12 +197,25 @@ export default function ServerPics({ photoState }: ServerPicsProps) {
   }
 
   return (
-    <div className="h-screen w-screen bg-black relative">
-      <AnimatePresence mode="wait">
-        <PhotoLoader photo={currentPhoto.photo} />
-      </AnimatePresence>
+    <div className="h-screen w-screen bg-black relative overflow-hidden">
+      <motion.div
+        className="absolute top-0 left-0 w-full h-full"
+        animate={{
+          opacity: hide ? 0 : 1,
+          translateX:
+            animate === "right" ? "-100%" : animate === "left" ? "100%" : 0,
+          translateY:
+            animate === "up" ? "-100%" : animate === "down" ? "100%" : 0,
+        }}
+        transition={{ duration: 0.5 }}
+      >
+        <AnimatePresence mode="wait">
+          <PhotoLoader photo={currentPhoto.photo} />
+        </AnimatePresence>
+      </motion.div>
 
       <Notification message={notification} />
+      {menuActive && <ServerMenu onClose={() => setMenuActive(false)} />}
     </div>
   );
 }
