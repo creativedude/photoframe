@@ -138,6 +138,7 @@ export async function GET(request: Request) {
           photosDir: PHOTOS_DIR,
           currentDir: currentSettings.currentFolder,
           settings: currentSettings,
+          photos: photos,
         },
         { status: 404 }
       );
