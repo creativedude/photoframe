@@ -136,6 +136,8 @@ export async function GET(request: Request) {
         {
           error: "No photos found",
           photosDir: PHOTOS_DIR,
+          currentDir: currentSettings.currentFolder,
+          settings: currentSettings,
         },
         { status: 404 }
       );

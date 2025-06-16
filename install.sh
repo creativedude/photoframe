@@ -16,6 +16,18 @@ fi
 # Create photodir if it doesn't exist
 mkdir -p "$PHOTODIR"
 
+# Determine the correct user to use
+if [ -n "$SUDO_USER" ]; then
+    SERVICE_USER="$SUDO_USER"
+else
+    SERVICE_USER="$(whoami)"
+fi
+echo "Using service user: $SERVICE_USER"
+
+# Update service file with correct user
+echo "Updating service file with correct user"
+sed -i "s|User=.*|User=$SERVICE_USER|" photoframe.service
+
 # Copy service file
 echo "Copying photoframe.service to /etc/systemd/system/"
 sudo cp photoframe.service /etc/systemd/system/
@@ -39,9 +51,14 @@ echo "PHOTOFRAME_BASE_PATH=$PHOTODIR" > .env
 echo "Running npm install"
 npm install
 
-
 # Run npm install
 echo "Running npm run build"
 npm run build
+
+# Enable and start the service
+echo "Enabling and starting photoframe service..."
+sudo systemctl daemon-reload
+sudo systemctl enable photoframe.service
+sudo systemctl start photoframe.service
 
 echo "Installation complete!" 
