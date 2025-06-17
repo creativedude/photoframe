@@ -158,8 +158,8 @@ export default function ServerMenu({ onClose }: ServerMenuProps) {
   }
 
   return (
-    <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center">
-      <div className="bg-gray-800/80 p-6 rounded-lg w-auto">
+    <div className="absolute top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center overflow-y-auto py-8">
+      <div className="bg-gray-800/80 p-6 rounded-lg w-auto max-h-[calc(100vh-4rem)] overflow-y-auto">
         <h2 className="text-white text-xl mb-4">Select Folder</h2>
         <div className="grid grid-cols-3 gap-4">
           {settings.folders.map((folder, index) => (
@@ -167,7 +167,7 @@ export default function ServerMenu({ onClose }: ServerMenuProps) {
               key={folder}
               onClick={() => handleFolderSelect(folder)}
               className={[
-                "bg-white/50 p-4 rounded-lg text-white transition-all min-w-[300px] h-[200px] relative overflow-hidden",
+                "bg-white/50 p-4 rounded-lg text-white transition-all min-w-[200px] h-[100px] relative overflow-hidden",
                 folder === selectedFolder && "border-2 border-white",
                 index === selectedIndex
                   ? "opacity-100 border-2 border-white"
